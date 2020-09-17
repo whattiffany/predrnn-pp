@@ -12,7 +12,8 @@ from data_provider import datasets_factory
 from utils import preprocess
 from utils import metrics
 from skimage.measure import compare_ssim
-
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 # -----------------------------------------------------------------------------
 FLAGS = tf.app.flags.FLAGS
 
@@ -59,13 +60,13 @@ tf.app.flags.DEFINE_boolean('reverse_input', True,
                             'whether to reverse the input frames while training.')
 tf.app.flags.DEFINE_integer('batch_size', 8,
                             'batch size for training.')
-tf.app.flags.DEFINE_integer('max_iterations', 80000,
+tf.app.flags.DEFINE_integer('max_iterations', 80000, #80000
                             'max num of steps.')
-tf.app.flags.DEFINE_integer('display_interval', 1,
+tf.app.flags.DEFINE_integer('display_interval', 100,
                             'number of iters showing training loss.')
-tf.app.flags.DEFINE_integer('test_interval', 2000,
+tf.app.flags.DEFINE_integer('test_interval', 2000, #2000
                             'number of iters for test.')
-tf.app.flags.DEFINE_integer('snapshot_interval', 10000,
+tf.app.flags.DEFINE_integer('snapshot_interval', 10000, #10000
                             'number of iters saving models.')
 
 class Model(object):
@@ -167,7 +168,6 @@ def main(argv=None):
         if train_input_handle.no_batch_left():
             train_input_handle.begin(do_shuffle=True)
         ims = train_input_handle.get_batch()
-        print(ims.astype())
         ims = preprocess.reshape_patch(ims, FLAGS.patch_size)
 
         if itr < 50000:
@@ -223,8 +223,8 @@ def main(argv=None):
                 sharp.append(0)
             mask_true = np.zeros((FLAGS.batch_size,
                                   FLAGS.seq_length-FLAGS.input_length-1,
-                                  FLAGS.img_width/FLAGS.patch_size,
-                                  FLAGS.img_width/FLAGS.patch_size,
+                                  FLAGS.img_width//FLAGS.patch_size,
+                                  FLAGS.img_width//FLAGS.patch_size,
                                   FLAGS.patch_size**2*FLAGS.img_channel))
             while(test_input_handle.no_batch_left() == False):
                 batch_id = batch_id + 1
